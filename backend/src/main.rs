@@ -3,6 +3,7 @@ mod handler;
 use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::{http::header, web, App, HttpServer};
+use actix_web_lab::web::spa;
 use common::User;
 use mongodb::{bson::doc, Client, IndexModel, options::IndexOptions};
 
@@ -17,21 +18,28 @@ async fn main() -> std::io::Result<()> {
     create_username_index(&client).await;
 
     HttpServer::new(move || {
-        let cors = Cors::default()
-        .allowed_origin("http://localhost:3000")
-        .allowed_methods(vec!["GET", "POST", "PATCH", "DELETE"])
-        .allowed_headers(vec![
-            header::CONTENT_TYPE,
-            header::AUTHORIZATION,
-            header::ACCEPT,
-        ])
-        .supports_credentials();
+        // let cors = Cors::default()
+        // .allowed_origin("http://localhost:3000")
+        // .allowed_methods(vec!["GET", "POST", "PATCH", "DELETE"])
+        // .allowed_headers(vec![
+        //     header::CONTENT_TYPE,
+        //     header::AUTHORIZATION,
+        //     header::ACCEPT,
+        // ])
+        // .supports_credentials();
         App::new()
             .app_data(web::Data::new(client.clone()))
-            .configure(handler::config)
-            .service(Files::new("/", "./static/dist/").index_file("index.html"))
-            .wrap(cors)
             .wrap(Logger::default())
+            .configure(handler::config)
+            .service(
+                spa()
+                .index_file("./static/dist/index.html")
+                .static_resources_mount("./static/dist/")
+                .static_resources_location("./static/dist/")
+                .finish())
+            // .service(Files::new("/", "./static/dist/").index_file("index.html"))
+            // .wrap(cors)
+
     })
     .bind(("127.0.0.1", 8080))?
     .run()
