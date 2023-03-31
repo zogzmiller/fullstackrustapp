@@ -34,8 +34,8 @@ async fn main() -> std::io::Result<()> {
             .service(
                 spa()
                 .index_file("./static/dist/index.html")
-                .static_resources_mount("./static/dist/")
-                .static_resources_location("./static/dist/")
+                .static_resources_mount("./static/dist")
+                .static_resources_location("./static/dist")
                 .finish())
             // .service(Files::new("/", "./static/dist/").index_file("index.html"))
             // .wrap(cors)
